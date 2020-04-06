@@ -26,7 +26,7 @@ $('#analyse').on('click', function(event) {
 function updateTable() {
 	//Create table
 	d3.select("#results").select("table").remove();
-	let table = d3.select("#results").append("table");
+	let table = d3.select("#results").append("table").attr("class","table")
 	let thead = table.append('thead');
 	let tbody = table.append('tbody');
 
