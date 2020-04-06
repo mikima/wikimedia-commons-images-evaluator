@@ -17,6 +17,7 @@ $('#analyse').on('click', function(event) {
 		});
 
 		getDetails(d, results, results.length - 1);
+		getTalkPage(d, results, results.length - 1);
 		setTimeout(500);
 		getGlobalUsage(d, results, results.length - 1);
 	})
@@ -89,7 +90,6 @@ function getDetails(_name, _resultsArray, _index) {
 // example: https://commons.wikimedia.org/w/api.php?action=query&prop=globalusage&titles=File:2015_Finland_opinion_polls.png&format=json
 
 function getGlobalUsage(_name, _resultsArray, _index) {
-	var results = {};
 
 	var settings = {
 		'cache': false,
@@ -112,6 +112,38 @@ function getGlobalUsage(_name, _resultsArray, _index) {
 		_resultsArray[_index]["usage"] = usage.length;
 		console.log(_resultsArray);
 		updateTable()
+	});
+}
+
+// TODO get discussion page
+// https://commons.wikimedia.org//w/api.php?action=parse&page=File_talk:Viru_Bog_at_winter.jpg&prop=wikitext&formatversion=2&format=json
+function getTalkPage(_name, _resultsArray, _index) {
+
+	var settings = {
+		'cache': false,
+		'dataType': "jsonp",
+		"async": true,
+		"crossDomain": true,
+		"url": "https://commons.wikimedia.org//w/api.php?action=parse&prop=wikitext&formatversion=2&format=json&page=File_talk:" + _name.replace("File:",""),
+		"method": "GET",
+		"headers": {
+			"accept": "application/json",
+			"Access-Control-Allow-Origin": "*"
+		}
+	}
+
+	let hasTalk = false;
+	let talkSize = 0;
+
+	$.ajax(settings).done(function(response) {
+		if('parse' in response) {
+			console.log(response['parse']['wikitext'])
+			talkSize = response['parse']['wikitext'].length;
+			hasTalk = true;
+		}
+		_resultsArray[_index]["Talk page"] = hasTalk;
+		_resultsArray[_index]["Talk size"] = talkSize;
+
 	});
 
 	return results
