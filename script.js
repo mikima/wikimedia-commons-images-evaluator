@@ -13,7 +13,13 @@ $('#analyse').on('click', function(event) {
 	names.forEach(function(d) {
 		//add it to the array
 		results.push({
-			"name": d
+			"name": d,
+			"extension":"",
+			"usage":"",
+			"Talk page":"",
+			"Talk size":"",
+			"revisions":"",
+			"users":""
 		});
 
 		getDetails(d, results, results.length - 1);
@@ -62,25 +68,28 @@ function getDetails(_name, _resultsArray, _index) {
 		url: 'https://cors-anywhere.herokuapp.com/' + "https://tools.wmflabs.org/magnus-toolserver/commonsapi.php?versions&image=" + _name,
 		dataType: "xml",
 		success: function(xml) {
+			try {
+				var users = []
+				//get revisions in XML
+				var revisions = xml.getElementsByTagName("version");
+				// for each revision, get the user name
+				for (var i = 0; i < revisions.length; i++) {
+					var user = revisions[i].getElementsByTagName("user")[0].innerHTML
+					users.push(user);
+				}
+				//get the file name
+				var extension = xml.getElementsByTagName("file")[0].getElementsByTagName("name")[0].innerHTML.split('.').pop();;
+				// console.log(extension)
+				// console.log(users)
+				_resultsArray[_index]["revisions"] = users.length;
+				_resultsArray[_index]["users"] = users.join(",");
+				_resultsArray[_index]["extension"] = extension;
 
-			var users = []
-			//get revisions in XML
-			var revisions = xml.getElementsByTagName("version");
-			// for each revision, get the user name
-			for (var i = 0; i < revisions.length; i++) {
-				var user = revisions[i].getElementsByTagName("user")[0].innerHTML
-				users.push(user);
+				// console.log(_resultsArray);
+				updateTable()
+			} catch (e) {
+				console.log(e);
 			}
-			//get the file name
-			var extension = xml.getElementsByTagName("file")[0].getElementsByTagName("name")[0].innerHTML.split('.').pop();;
-			// console.log(extension)
-			// console.log(users)
-			_resultsArray[_index]["revisions"] = users.length;
-			_resultsArray[_index]["users"] = users.join(",");
-			_resultsArray[_index]["extension"] = extension;
-
-			console.log(_resultsArray);
-			updateTable()
 		}
 	});
 }
@@ -105,13 +114,17 @@ function getGlobalUsage(_name, _resultsArray, _index) {
 	}
 
 	$.ajax(settings).done(function(response) {
-		console.log(response)
-		var key = Object.keys(response['query']['pages'])[0];
-		var usage = response['query']['pages'][key]['globalusage'];
-		// console.log(usage)
-		_resultsArray[_index]["usage"] = usage.length;
-		console.log(_resultsArray);
-		updateTable()
+		// console.log(response)
+		try {
+			var key = Object.keys(response['query']['pages'])[0];
+			var usage = response['query']['pages'][key]['globalusage'];
+			// console.log(usage)
+			_resultsArray[_index]["usage"] = usage.length;
+			// console.log(_resultsArray);
+			updateTable();
+		} catch (e) {
+			console.log(e);
+		}
 	});
 }
 
@@ -136,15 +149,17 @@ function getTalkPage(_name, _resultsArray, _index) {
 	let talkSize = 0;
 
 	$.ajax(settings).done(function(response) {
-		if('parse' in response) {
-			console.log(response['parse']['wikitext'])
-			talkSize = response['parse']['wikitext'].length;
-			hasTalk = true;
+		try {
+			if('parse' in response) {
+				// console.log(response['parse']['wikitext'])
+				talkSize = response['parse']['wikitext'].length;
+				hasTalk = true;
+			}
+			_resultsArray[_index]["Talk page"] = hasTalk;
+			_resultsArray[_index]["Talk size"] = talkSize;
+			updateTable();
+		} catch (e) {
+			console.log(e);
 		}
-		_resultsArray[_index]["Talk page"] = hasTalk;
-		_resultsArray[_index]["Talk size"] = talkSize;
-
 	});
-
-	return results
 }
