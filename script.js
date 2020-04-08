@@ -33,7 +33,7 @@ $('#analyse').on('click', function(event) {
 function updateTable() {
 	//Create table
 	d3.select("#results").select("table").remove();
-	let table = d3.select("#results").append("table").attr("class","table")
+	let table = d3.select("#results").append("table").attr("class","table").attr("class","table-striped")
 	let thead = table.append('thead');
 	let tbody = table.append('tbody');
 
@@ -65,7 +65,7 @@ function getDetails(_name, _resultsArray, _index) {
 	$.ajax({
 		type: "GET",
 		//using "cors-anywhere" prefix since the commons API doesn't provide CORS
-		url: 'https://cors-anywhere.herokuapp.com/' + "https://tools.wmflabs.org/magnus-toolserver/commonsapi.php?versions&image=" + _name,
+		url: 'https://wikimedia-cors.herokuapp.com/' + "https://tools.wmflabs.org/magnus-toolserver/commonsapi.php?versions&image=" + _name,
 		dataType: "xml",
 		success: function(xml) {
 			try {
@@ -82,7 +82,7 @@ function getDetails(_name, _resultsArray, _index) {
 				// console.log(extension)
 				// console.log(users)
 				_resultsArray[_index]["revisions"] = users.length;
-				_resultsArray[_index]["users"] = users.join(",");
+				_resultsArray[_index]["users"] = users.join(", ");
 				_resultsArray[_index]["extension"] = extension;
 
 				// console.log(_resultsArray);

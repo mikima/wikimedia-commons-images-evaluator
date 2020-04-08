@@ -22,21 +22,22 @@
 	<!-- D3 -->
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.1/d3.min.js" integrity="sha256-SQJ/nCYPXFPuqoS56EfnesDBPNiitndOIfN2WdPRi/o=" crossorigin="anonymous"></script>
 	<div class=container>
-		<div class="form-group">
-			<div class="row">
-				<h1>Hello, world!</h1>
+
+		<div class="row">
+			<div class="col-sm">
+				<div class="form-group">
+					<label for="exampleFormControlTextarea1">Page List</label>
+					<textarea class="form-control rounded-0" id="pageList" rows="10" placeholder="https://commons.wikimedia.org/wiki/File:2015_Finland_opinion_polls.png">https://commons.wikimedia.org/wiki/File:2015_Finland_opinion_polls.png</textarea>
+				</div>
 			</div>
-			<div class="row">
-				<label for="exampleFormControlTextarea1">Page List</label>
-				<textarea class="form-control rounded-0" id="pageList" rows="10" placeholder="https://commons.wikimedia.org/wiki/File:2015_Finland_opinion_polls.png">
-https://commons.wikimedia.org/wiki/File:2015_Finland_opinion_polls.png
-https://commons.wikimedia.org/wiki/File:20190912_Stacked_warming_stripes_-_atmospheric_layers_(derived_from_Ed_Hawkins).png
-https://commons.wikimedia.org/wiki/File:Flagellum_base_diagram-en.svg</textarea>
-			</div>
-			<div class="row">
+		</div>
+		<div class="row">
+			<div class="col-sm">
 				<button type="button" class="btn btn-primary" id="analyse">analyse</button>
 			</div>
-			<div class="row" id="results">
+		</div>
+		<div class="row">
+			<div class="col-sm" id="results">
 			</div>
 		</div>
 	</div>
