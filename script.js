@@ -16,10 +16,12 @@ $('#analyse').on('click', function(event) {
 			"name": d,
 			"extension":"",
 			"usage":"",
+			"usage details":"",
 			"Talk page":"",
 			"Talk size":"",
 			"revisions":"",
-			"users":""
+			"users":"",
+			"comments":""
 		});
 
 		getDetails(d, results, results.length - 1);
@@ -61,7 +63,48 @@ function updateTable() {
 
 }
 
+// Call using wikimedia standard api.
+// Known limitation: only 500 revisions per image.
+// TODO: iterate to get all the revisions
+// https://commons.wikimedia.org/w/api.php?action=query&titles=file:2015_Finland_opinion_polls.png&prop=imageinfo&iiprop=timestamp|user|url|comment
 function getDetails(_name, _resultsArray, _index) {
+
+	var settings = {
+		'cache': false,
+		'dataType': "jsonp",
+		"async": true,
+		"crossDomain": true,
+		"url": "https://commons.wikimedia.org/w/api.php?action=query&format=json&prop=imageinfo&iilimit=500&iiprop=timestamp|user|url|comment&titles=" + _name,
+		"method": "GET",
+		"headers": {
+			"accept": "application/json",
+			"Access-Control-Allow-Origin": "*"
+		}
+	}
+
+	$.ajax(settings).done(function(response) {
+		// console.log(response)
+		try {
+			var key = Object.keys(response['query']['pages'])[0];
+			var extension = response['query']['pages'][key]['title'].split('.').pop()
+			var imageinfo = response['query']['pages'][key]['imageinfo'];
+
+			_resultsArray[_index]["revisions"] = imageinfo.length;
+			_resultsArray[_index]["users"] = imageinfo.map(d => d.user).join(",");
+			_resultsArray[_index]["comments"] = imageinfo.map(d => d.comment).join(",");
+			_resultsArray[_index]["extension"] = extension;
+
+			// _resultsArray[_index]["usage"] = imageinfo.length;
+			// _resultsArray[_index]["usage details"] = usage.map(d => d.wiki).join(",");
+			updateTable();
+		} catch (e) {
+			console.log(e);
+		}
+	});
+}
+
+// deprecated
+function getDetailsXML(_name, _resultsArray, _index) {
 	$.ajax({
 		type: "GET",
 		//using "cors-anywhere" prefix since the commons API doesn't provide CORS
@@ -70,6 +113,7 @@ function getDetails(_name, _resultsArray, _index) {
 		success: function(xml) {
 			try {
 				var users = []
+				// console.log(xml)
 				//get revisions in XML
 				var revisions = xml.getElementsByTagName("version");
 				// for each revision, get the user name
@@ -78,7 +122,7 @@ function getDetails(_name, _resultsArray, _index) {
 					users.push(user);
 				}
 				//get the file name
-				var extension = xml.getElementsByTagName("file")[0].getElementsByTagName("name")[0].innerHTML.split('.').pop();;
+				var extension = xml.getElementsByTagName("file")[0].getElementsByTagName("name")[0].innerHTML.split('.').pop();
 				// console.log(extension)
 				// console.log(users)
 				_resultsArray[_index]["revisions"] = users.length;
@@ -94,7 +138,7 @@ function getDetails(_name, _resultsArray, _index) {
 	});
 }
 
-//TODO get image usage using this:
+// get image usage using this:
 // https://www.mediawiki.org/wiki/Extension:GlobalUsage
 // example: https://commons.wikimedia.org/w/api.php?action=query&prop=globalusage&titles=File:2015_Finland_opinion_polls.png&format=json
 
@@ -120,7 +164,7 @@ function getGlobalUsage(_name, _resultsArray, _index) {
 			var usage = response['query']['pages'][key]['globalusage'];
 			// console.log(usage)
 			_resultsArray[_index]["usage"] = usage.length;
-			// console.log(_resultsArray);
+			_resultsArray[_index]["usage details"] = usage.map(d => d.wiki).join(",");
 			updateTable();
 		} catch (e) {
 			console.log(e);
@@ -128,7 +172,7 @@ function getGlobalUsage(_name, _resultsArray, _index) {
 	});
 }
 
-// TODO get discussion page
+// get discussion page
 // https://commons.wikimedia.org//w/api.php?action=parse&page=File_talk:Viru_Bog_at_winter.jpg&prop=wikitext&formatversion=2&format=json
 function getTalkPage(_name, _resultsArray, _index) {
 
